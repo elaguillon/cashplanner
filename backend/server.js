@@ -223,30 +223,7 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
                 contents: chatHistory,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "type": { "type": "STRING" },
-                            "question": { "type": "STRING" },
-                            "transactions": {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        "name": { "type": "STRING" },
-                                        "amount": { "type": "NUMBER" },
-                                        "type": { "type": "STRING", "enum": ["income", "expense"] },
-                                        "startDate": { "type": "STRING" },
-                                        "frequency": { "type": "STRING", "enum": ["none", "days", "weeks", "months"] },
-                                        "interval": { "type": "NUMBER" }
-                                    },
-                                    "required": ["name", "amount", "type", "startDate", "frequency"]
-                                }
-                            }
-                        },
-                        "required": ["type"]
-                    }
+                    responseMimeType: "application/json"
                 }
             })
         });
