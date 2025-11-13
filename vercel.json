@@ -16,7 +16,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/public/index.html" // Fallback to index.html for any unmatched static path
+      "dest": "/public/index.html"
     }
   ]
 }
