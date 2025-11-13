@@ -7,7 +7,7 @@
   ],
   "functions": {
     "backend/api/index.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/nodejs@18.x"
     }
   }
 }
