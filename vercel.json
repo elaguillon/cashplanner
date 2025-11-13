@@ -4,5 +4,10 @@
       "source": "/api/(.*)",
       "destination": "/backend/api"
     }
-  ]
+  ],
+  "functions": {
+    "backend/api/index.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
