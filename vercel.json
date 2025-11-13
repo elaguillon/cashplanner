@@ -1,9 +1,8 @@
 {
   "builds": [
     {
-      "src": "public/**",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "public" }
+      "src": "public",
+      "use": "@vercel/static-build"
     },
     {
       "src": "backend/api/index.js",
@@ -17,7 +16,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/public/index.html"
+      "dest": "/public/$1"
     }
   ]
 }
