@@ -9,14 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const db = new Database('cashplanner.db', { verbose: console.log });
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // Use environment variable
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Get Gemini API key from .env
-
-// Ensure API key is present
-if (!GEMINI_API_KEY) {
-    console.error('Error: GEMINI_API_KEY is not set in environment variables.');
-    process.exit(1);
-}
-
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Get Gemini API key from environment
+console.log('Server sees GEMINI_API_KEY (first 4, last 4):', GEMINI_API_KEY ? GEMINI_API_KEY.substring(0, 4) + '...' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4) : 'NOT SET');
 // Create users table if it doesn't exist
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
@@ -214,6 +208,7 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
     const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
     try {
+        console.log('Making request to Gemini API:', geminiApiUrl);
         const response = await fetch(geminiApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -251,15 +246,16 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Gemini API error:', response.status, errorText);
+            console.error('Gemini API response not OK:', response.status, errorText);
             throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
         }
 
         const result = await response.json();
+        console.log('Gemini API call successful.');
         res.status(200).json(result);
 
     } catch (error) {
-        console.error('Error in /gemini-chat:', error);
+        console.error('Error in /gemini-chat endpoint:', error);
         res.status(500).json({ message: 'Internal server error', details: error.message });
     }
 });
