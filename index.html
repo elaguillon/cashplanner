@@ -1,0 +1,1636 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.2">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en" class="dark"&gt; &lt;!-- Dark mode enabled --&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Cash Planner&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 1. Tailwind CSS --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 2. Inter Font --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 3. Chart.js, date-fns, adapter, and annotation plugin --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"&gt;&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- 4. Showdown (Markdown parser for chat) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"&gt;&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Inter', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Custom styles for modal backdrop */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.modal-backdrop {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(0, 0, 0, 0.7); /* Darker for dark mode */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Ensure chart is responsive */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#chart-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: relative;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 50vh;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>min-height: 400px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Custom scrollbar */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-track {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #27272a; /* dark:zinc-800 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-thumb {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #52525b; /* dark:zinc-600 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-thumb:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #71717a; /* dark:zinc-500 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Custom class for date picker cells */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.datepicker-day {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: background-color 0.15s ease-in-out;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.datepicker-day:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #3f83f8; /* blue-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.datepicker-day.other-month {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #6b7280; /* gray-500 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.datepicker-day.other-month:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #374151; /* gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #d1d5db; /* gray-300 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Chatbot Styles */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#chat-ui-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #374151; /* dark:gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.75rem; /* rounded-xl */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#chat-history {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 250px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chat-message {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 80%;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chat-message.user {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #3b82f6; /* blue-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-self: flex-end;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chat-message.model {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #374151; /* dark:gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #d1d5db; /* dark:gray-300 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-self: flex-start;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Markdown formatting */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chat-message.model p { margin-bottom: 0.5rem; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.chat-message.model ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-gray-100 p-4 md:p-8 dark:bg-gray-900"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- MAIN APP Container --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="app-container" class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8 dark:bg-gray-800"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Header --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;header class="mb-6 flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100"&gt;Cash Planner&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 dark:text-gray-400"&gt;Visualize your income and expenses over time.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Controls --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Navigation Group --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-prev" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold p-3 rounded-full transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span id="current-range" class="text-lg font-semibold text-gray-700 w-48 text-center dark:text-gray-300"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-next" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold p-3 rounded-full transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-today" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 ml-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;Today&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex items-center gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- View Toggles --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="view-toggle-container" class="flex items-center bg-gray-200 rounded-lg p-1 dark:bg-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button id="btn-view-1m" class="btn-view active bg-white text-blue-600 shadow rounded-md py-2 px-4 font-medium text-sm transition-all dark:bg-blue-600 dark:text-white"&gt;1 Month&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button id="btn-view-3m" class="btn-view text-gray-600 hover:text-gray-900 py-2 px-4 font-medium text-sm transition-all dark:text-gray-400 dark:hover:text-white"&gt;3 Months&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button id="btn-view-1y" class="btn-view text-gray-600 hover:text-gray-900 py-2 px-4 font-medium text-sm transition-all dark:text-gray-400 dark:hover:text-white"&gt;1 Year&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Display Mode Toggles --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex items-center bg-gray-200 rounded-lg p-1 dark:bg-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button id="btn-display-chart" class="btn-display active bg-white text-blue-600 shadow rounded-md py-2 px-4 font-medium text-sm transition-all dark:bg-blue-600 dark:text-white"&gt;Chart&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button id="btn-display-calendar" class="btn-display text-gray-600 hover:text-gray-900 py-2 px-4 font-medium text-sm transition-all dark:text-gray-400 dark:hover:text-white"&gt;Calendar&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Chart --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="chart-container" class="w-full mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;canvas id="balanceChart"&gt;&lt;/canvas&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- NEW Calendar Container --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="calendar-container" class="w-full mb-8 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Calendar Header (Days of Week) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-7 gap-px text-center text-xs font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-300 dark:border-gray-700 pb-2 mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Sun&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Mon&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Tue&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Wed&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Thu&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Fri&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Sat&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Calendar Grid --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="calendar-grid" class="grid grid-cols-7 gap-px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Days will be injected here --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- NEW Gemini Chat UI --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4"&gt;Add with Gemini&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="chat-ui-container" class="bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden shadow-inner"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Chat History --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="chat-history" class="custom-scrollbar overflow-y-auto p-4 flex flex-col gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Chat messages will be injected here --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="chat-message model rounded-lg p-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p&gt;How can I help you plan your transactions?</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Try saying: &lt;em&gt;"Add my $2000 salary every 2 weeks starting this Friday"&lt;/em&gt; or &lt;em&gt;"Add $50 for groceries every Saturday"&lt;/em&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Chat Spinner --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="chat-spinner" class="p-4 flex items-center gap-3 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse [animation-delay:-0.3s]"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse [animation-delay:-0.15s]"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Chat Input --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;form id="chat-form" class="border-t border-gray-200 dark:border-gray-700 p-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="chat-input" placeholder="Chat with Gemini to add transactions..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button type="submit" id="chat-submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg transition duration-150"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.175 16V4.697l-4.243 4.243a1 1 0 101.414 1.414L10 6.828l3.652 3.652a1 1 0 101.414-1.414L10.826 4.828V16a1 1 0 00.928.996l5 1.428a1 1 0 001.17-1.41l-7-14z" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Transaction List --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-between items-center mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100"&gt;Transaction Rules&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-add-new-rule" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Add New Transaction</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="transaction-list-container" class="custom-scrollbar max-h-96 overflow-y-auto bg-gray-50 p-4 rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Transaction items will be injected here --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p id="empty-list-msg" class="text-gray-500 text-center dark:text-gray-400"&gt;No transaction rules defined. Click 'Add New Transaction' or click on the chart to start.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Modals (for the main app) --&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Setup Modal --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="setup-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100"&gt;Welcome!&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p class="text-gray-600 mb-6 dark:text-gray-300"&gt;Let's get started. Please enter your balances and today's date.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;form id="setup-form"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="starting-balance" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Starting Balance ($)&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="number" id="starting-balance" value="5000" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="safe-balance" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Safe Balance ($)&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="number" id="safe-balance" value="1000" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;label for="start-date" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Start Date&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;input type="text" id="start-date" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Start Forecasting</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Transaction Modal --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="tx-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white w-full max-w-lg p-8 rounded-xl shadow-2xl dark:bg-gray-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 id="tx-modal-title" class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100"&gt;Add Transaction&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;form id="tx-form"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Hidden fields for editing --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="hidden" id="tx-id"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="hidden" id="tx-instance-date"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Name --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="md:col-span-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="tx-name" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Transaction Name&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="tx-name" placeholder="e.g., Salary, Rent" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Amount --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="tx-amount" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Amount ($)&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="number" id="tx-amount" step="0.01" min="0" placeholder="100.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Type --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Type&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div id="tx-type-group" class="flex flex-wrap items-center gap-x-4 gap-y-2 h-full"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;label class="flex items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="radio" name="tx-type" value="income" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300" checked&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="ml-2 text-sm text-gray-700 dark:text-gray-300"&gt;Income&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;label class="flex items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="radio" name="tx-type" value="expense" class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="ml-2 text-sm text-gray-700 dark:text-gray-300"&gt;Expense&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;label class="flex items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="radio" name="tx-type" value="balance" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="ml-2 text-sm text-gray-700 dark:text-gray-300"&gt;Balance&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Start Date --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="md:col-span-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="tx-date" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Date&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="tx-date" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 cursor-pointer" required&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;p id="tx-date-label" class="text-xs text-gray-500 mt-1 dark:text-gray-400"&gt;For a recurring transaction, this is the first date it occurs.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;!-- Recurrence (NEW UI) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="md:col-span-2 space-y-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"&gt;Recurrence&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex items-center gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;label class="flex items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="radio" name="tx-recurrence-toggle" value="none" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600" checked&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="ml-2 text-sm text-gray-700 dark:text-gray-300"&gt;Does not repeat&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;label class="flex items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;input type="radio" name="tx-recurrence-toggle" value="repeat" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span class="ml-2 text-sm text-gray-700 dark:text-gray-300"&gt;Repeats every&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div id="tx-recurrence-options" class="flex items-center gap-2 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;input type="number" id="tx-interval" value="1" min="1" class="w-20 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;select id="tx-frequency" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;option value="days"&gt;Days&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;option value="weeks"&gt;Weeks&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;option value="months"&gt;Months&lt;/option&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Buttons --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex justify-end gap-4 mt-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button type="button" id="btn-tx-delete" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition duration-150 hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Delete</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button type="button" id="btn-tx-cancel" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Cancel</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button type="submit" id="btn-tx-save" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-150"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Save</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Day Transactions Modal --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="day-tx-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 id="day-tx-title" class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100"&gt;Transactions&lt;/h2&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- List of transactions for the day --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="day-tx-list" class="max-h-64 overflow-y-auto space-y-3 mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- JS will populate this --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-day-add-new" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Add Another Transaction</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-day-close" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Close</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Confirmation Modal --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 id="confirm-title" class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100"&gt;Confirm Change&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p id="confirm-message" class="text-gray-600 mb-6 dark:text-gray-300"&gt;You are changing a recurring transaction. How would you like to apply this change?&lt;/p&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-confirm-one" class="w-full text-left bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Apply to this instance only</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span id="confirm-one-date" class="block text-sm text-gray-500 dark:text-gray-400"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-confirm-all" class="w-full text-left bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Apply to this and all future instances</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-end mt-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>&lt;button type="button" id="btn-confirm-cancel" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition duration-150 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Cancel</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- NEW Date Picker Modal --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="date-picker-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white w-full max-w-xs p-6 rounded-xl shadow-2xl dark:bg-gray-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Header --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="flex items-center justify-between mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-date-prev" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 dark:text-gray-300" viewBox="0 0 20 20" fill="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h3 id="date-picker-month-year" class="text-lg font-semibold text-gray-800 dark:text-gray-100"&gt;&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="btn-date-next" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 dark:text-gray-300" viewBox="0 0 20 20" fill="currentColor"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Grid Header --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Su&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Mo&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Tu&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;We&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Th&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Fr&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;Sa&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Grid Body --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="date-picker-grid" class="grid grid-cols-7 gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;!-- Days will be injected here --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Error/Message Toast --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="toast" class="fixed bottom-8 right-8 z-50 bg-red-600 text-white py-3 px-6 rounded-lg shadow-lg hidden transition-all duration-300 transform translate-y-10 opacity-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span id="toast-message"&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="module"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.addEventListener('DOMContentLoaded', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Imports ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const errorContainer = `&lt;div style="position:fixed; top:0; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; background: #111827; color: #f87171; padding: 20px; text-align: center; font-family: 'Inter', sans-serif; font-size: 1.2rem;"&gt;&lt;strong&gt;Error:&lt;/strong&gt; A critical library failed to load. Please check your internet connection and try refreshing the page. (Details: %ERROR%)&lt;/div&gt;`;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!window.Chart) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error("Fatal Error: Chart.js library (window.Chart) did not load.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.body.innerHTML = errorContainer.replace('%ERROR%', 'Chart.js');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!window.dateFns || typeof window.dateFns.format !== 'function') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error("Fatal Error: date-fns library (window.dateFns) did not load correctly.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.body.innerHTML = errorContainer.replace('%ERROR%', 'date-fns (incomplete)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!window.Chart.registry.plugins.get('annotation')) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error("Fatal Error: Chart.js Annotation plugin did not auto-register.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.body.innerHTML = errorContainer.replace('%ERROR%', 'Chart.js Annotation Plugin');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!window.showdown) {</p>
+<p class="p1"><span class="Apple-converted-space">                 </span>console.error("Fatal Error: Showdown library (window.showdown) did not load.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.body.innerHTML = errorContainer.replace('%ERROR%', 'Showdown');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- dateFns Destructuring ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>format, parseISO, addDays, addWeeks, addMonths, startOfMonth, endOfMonth,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>startOfDay, eachDayOfInterval, isBefore, isAfter, isEqual, startOfYear, endOfYear, addYears,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>getDay, getDate, endOfWeek, startOfWeek, isSameMonth</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} = window.dateFns;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Global State ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let chartInstance = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let startingBalance = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let safeBalance = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let globalStartDate = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let transactions = [];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let currentDisplayMode = 'chart'; // 'chart' or 'calendar'</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let orangeGradient, redGradient;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let currentView = { unit: 'months', value: 1, referenceDate: null };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let confirmCallback = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let editingTxContext = null;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let datePickerState = { referenceDate: new Date(), targetInputId: null };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let markdownConverter = new showdown.Converter();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let geminiChatHistory = []; // For the chatbot</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- DOM Elements ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const setupModal = document.getElementById('setup-modal');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const txModal = document.getElementById('tx-modal');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const confirmModal = document.getElementById('confirm-modal');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dayTxModal = document.getElementById('day-tx-modal');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const datePickerModal = document.getElementById('date-picker-modal');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const setupForm = document.getElementById('setup-form');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const txForm = document.getElementById('tx-form');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chartCanvas = document.getElementById('balanceChart').getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const currentRangeEl = document.getElementById('current-range');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const transactionListContainer = document.getElementById('transaction-list-container');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const emptyListMsg = document.getElementById('empty-list-msg');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const txAmountLabel = document.querySelector('label[for="tx-amount"]');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const txRecurrenceOptions = document.getElementById('tx-recurrence-options');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chartContainer = document.getElementById('chart-container');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const calendarContainer = document.getElementById('calendar-container');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const calendarGrid = document.getElementById('calendar-grid');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const viewToggleContainer = document.getElementById('view-toggle-container');</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Chatbot DOM Elements</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chatForm = document.getElementById('chat-form');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chatInput = document.getElementById('chat-input');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chatHistoryContainer = document.getElementById('chat-history');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chatSpinner = document.getElementById('chat-spinner');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const chatSubmitBtn = document.getElementById('chat-submit-btn');</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Utility Functions ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const formatDate = (date) =&gt; format(date, 'yyyy-MM-dd');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const formatShortDate = (date) =&gt; format(date, 'MMM d, yyyy');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const generateUUID = () =&gt; crypto.randomUUID();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const showToast = (message, isError = true) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const toast = document.getElementById('toast');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const toastMessage = document.getElementById('toast-message');</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>toastMessage.textContent = message;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>toast.className = toast.className.replace(isError ? /bg-\w+-600/ : 'bg-red-600', isError ? 'bg-red-600' : 'bg-green-600');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (isError) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.remove('bg-green-600');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.add('bg-red-600');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.remove('bg-red-600');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.add('bg-green-600');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>toast.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.remove('translate-y-10', 'opacity-0');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.add('translate-y-0', 'opacity-100');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}, 10);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.remove('translate-y-0', 'opacity-100');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toast.classList.add('translate-y-10', 'opacity-0');</p>
+<p class="p1"><span class="Apple-converted-space">                     </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>toast.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}, 300);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}, 3000);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Modal Management ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openModal = (modal) =&gt; modal.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const closeModal = (modal) =&gt; modal.classList.add('hidden');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openSetupModal = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let todayStr = new Date().toISOString().split('T')[0]; // yyyy-MM-dd</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>todayStr = formatDate(new Date());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.warn("dateFns not ready for openSetupModal, using native Date.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('start-date').value = todayStr;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>openModal(setupModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openTxModal = (context = {}) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const { txId, instanceDate, clickDate } = context;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>txForm.reset();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Reset UI</p>
+<p class="p1"><span class="Apple-converted-space">                </span>txAmountLabel.textContent = "Amount ($)";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.querySelector('input[name="tx-recurrence-toggle"][value="none"]').checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>txRecurrenceOptions.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.querySelector('input[name="tx-recurrence-toggle"][value="repeat"]').disabled = false;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const titleEl = document.getElementById('tx-modal-title');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const deleteBtn = document.getElementById('btn-tx-delete');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const dateLabel = document.getElementById('tx-date-label');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const txDateInput = document.getElementById('tx-date');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>editingTxContext = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>deleteBtn.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.querySelector('input[name="tx-type"][value="balance"]').parentElement.classList.add('hidden');</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (txId) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Editing</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const tx = transactions.find(t =&gt; t.id === txId);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!tx) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>showToast('Error: Could not find transaction.');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>editingTxContext = { txId, instanceDate };</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>titleEl.textContent = 'Edit Transaction';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>deleteBtn.classList.remove('hidden');</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('tx-id').value = tx.id;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('tx-instance-date').value = instanceDate;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('tx-name').value = tx.name;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('tx-amount').value = tx.amount;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.querySelector(`input[name="tx-type"][value="${tx.type}"]`).checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txDateInput.value = tx.startDate;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dateLabel.textContent = "This is the first date this transaction occurs.";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Set recurrence UI</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (tx.frequency === 'none') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.querySelector('input[name="tx-recurrence-toggle"][value="none"]').checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txRecurrenceOptions.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.querySelector('input[name="tx-recurrence-toggle"][value="repeat"]').checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txRecurrenceOptions.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.getElementById('tx-interval').value = tx.interval;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.getElementById('tx-frequency').value = tx.frequency;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Adding new</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>titleEl.textContent = 'Add Transaction';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.querySelector('input[name="tx-type"][value="balance"]').parentElement.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txDateInput.value = clickDate ? clickDate : formatDate(new Date());</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dateLabel.textContent = "For a recurring transaction, this is the first date it occurs.";</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>openModal(txModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openDayTransactionsModal = (formattedDate, txs) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const titleEl = document.getElementById('day-tx-title');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const listEl = document.getElementById('day-tx-list');</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>titleEl.textContent = `Transactions on ${formatShortDate(parseISO(formattedDate))}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>listEl.innerHTML = ''; // Clear list</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>txs.forEach(tx =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const item = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg border dark:bg-gray-700 dark:border-gray-600';</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const colorClass = tx.type === 'income' ? 'text-green-500' : 'text-red-500';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const sign = tx.type === 'income' ? '+' : '-';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="font-medium text-gray-800 dark:text-gray-100"&gt;${tx.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="text-sm ${colorClass} font-semibold"&gt;${sign}$${tx.amount.toFixed(2)}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;button class="btn-day-edit p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" title="Edit"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"&gt;&lt;path d="M13.586 3.586a2 2 0 112.828 2.828l-7.96 7.96a2 2 0 01-1.06.586L3 16l.96-4.398a2 2 0 01.586-1.06l7.96-7.96zM12 5l-7 7 1.5 1.5L13.5 8 12 5z" /&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;button class="btn-day-delete p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" title="Delete"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"&gt;&lt;path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.querySelector('.btn-day-edit').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>closeModal(dayTxModal);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>openTxModal({ txId: tx.id, instanceDate: tx.instanceDate });</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.querySelector('.btn-day-delete').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>handleDeleteFromList(tx.id, tx.instanceDate);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>listEl.appendChild(item);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Re-bind the "Add Another" button</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const btnAddNew = document.getElementById('btn-day-add-new');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const btnAddNewClone = btnAddNew.cloneNode(true);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>btnAddNew.parentNode.replaceChild(btnAddNewClone, btnAddNew);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>btnAddNewClone.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>closeModal(dayTxModal);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>openTxModal({ clickDate: formattedDate });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>openModal(dayTxModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-day-close').addEventListener('click', () =&gt; closeModal(dayTxModal));</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openConfirmModal = (title, message, oneDate, callback) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('confirm-title').textContent = title;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('confirm-message').textContent = message;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const btnOne = document.getElementById('btn-confirm-one');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (oneDate) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>btnOne.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('confirm-one-date').textContent = `On ${formatShortDate(parseISO(oneDate))}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>btnOne.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>confirmCallback = callback;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>openModal(confirmModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const openDatePickerModal = (targetInputId) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>datePickerState.targetInputId = targetInputId;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const currentVal = document.getElementById(targetInputId).value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datePickerState.referenceDate = currentVal ? parseISO(currentVal) : new Date();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>datePickerState.referenceDate = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderDatePicker();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>openModal(datePickerModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const renderDatePicker = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const grid = document.getElementById('date-picker-grid');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const monthYearEl = document.getElementById('date-picker-month-year');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ref = datePickerState.referenceDate;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>monthYearEl.textContent = format(ref, 'MMMM yyyy');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>grid.innerHTML = '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const monthStart = startOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const monthEnd = endOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const calStart = startOfWeek(monthStart);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const calEnd = endOfWeek(monthEnd);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const days = eachDayOfInterval({ start: calStart, end: calEnd });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const day of days) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dayEl = document.createElement('button');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayEl.type = 'button';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayEl.className = 'datepicker-day w-10 h-10 flex items-center justify-center rounded-full font-medium text-sm text-gray-800 dark:text-gray-200';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayEl.textContent = getDate(day);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!isSameMonth(day, ref)) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>dayEl.classList.add('other-month');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayEl.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>document.getElementById(datePickerState.targetInputId).value = formatDate(day);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>closeModal(datePickerModal);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>grid.appendChild(dayEl);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Transaction Logic ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const getOccurrencesInRange = (rangeStart, rangeEnd) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const occurrences = {};</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rangeStart = startOfDay(rangeStart);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rangeEnd = startOfDay(rangeEnd);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const datesInRange = eachDayOfInterval({ start: rangeStart, end: rangeEnd });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const date of datesInRange) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>occurrences[formatDate(date)] = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const tx of transactions) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const txStartDate = startOfDay(parseISO(tx.startDate));</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const ruleStartsAfterRange = isAfter(txStartDate, rangeEnd);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const ruleEndsBeforeRange = tx.endDate &amp;&amp; isBefore(startOfDay(parseISO(tx.endDate)), rangeStart);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (ruleStartsAfterRange || ruleEndsBeforeRange) continue;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (tx.frequency === 'none') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (txStartDate &gt;= rangeStart &amp;&amp; txStartDate &lt;= rangeEnd) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>occurrences[tx.startDate].push({ ...tx, instanceDate: tx.startDate });</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let currentDate = txStartDate;</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (isBefore(currentDate, rangeStart)) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>while (isBefore(currentDate, rangeStart)) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>if (tx.frequency === 'days') {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>currentDate = addDays(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>} else if (tx.frequency === 'weeks') {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>currentDate = addWeeks(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>} else if (tx.frequency === 'months') {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>currentDate = addMonths(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>console.error("Error calculating next date in jump", e, tx);</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>while (currentDate &lt;= rangeEnd) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const formattedDate = formatDate(currentDate);</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const isSkipped = (tx.skipDates || []).includes(formattedDate);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const hasEnded = tx.endDate &amp;&amp; isAfter(currentDate, startOfDay(parseISO(tx.endDate)));</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (hasEnded) break;</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (!isSkipped) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const modification = (tx.modifications || {})[formattedDate];</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (modification) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>occurrences[formattedDate].push({ ...tx, ...modification, id: tx.id, instanceDate: formattedDate, isModifiedInstance: true });</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>occurrences[formattedDate].push({ ...tx, instanceDate: formattedDate });</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (tx.frequency === 'days') currentDate = addDays(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>else if (tx.frequency === 'weeks') currentDate = addWeeks(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>else if (tx.frequency === 'months') currentDate = addMonths(currentDate, tx.interval);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>else break;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>console.error("Error calculating next date", e, tx);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return occurrences;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const getBalanceAtDate = (targetDate) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!globalStartDate) return 0;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>targetDate = startOfDay(targetDate);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (isEqual(targetDate, globalStartDate)) return startingBalance;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (isBefore(targetDate, globalStartDate)) return startingBalance;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const rangeEnd = addDays(targetDate, -1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const occurrences = getOccurrencesInRange(globalStartDate, rangeEnd);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>let balance = startingBalance;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>eachDayOfInterval({ start: globalStartDate, end: rangeEnd }).forEach(date =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dailyTxs = occurrences[formatDate(date)] || [];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>for (const tx of dailyTxs) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const amount = parseFloat(tx.amount);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (tx.type === 'income') balance += amount;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>else if (tx.type === 'expense') balance -= amount;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return balance;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const calculateBalanceData = (rangeStart, rangeEnd) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let currentBalance = getBalanceAtDate(rangeStart);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const balanceData = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const safeBalanceData = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const annotations = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let annotationLabelPositionToggle = 'start';</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const occurrences = getOccurrencesInRange(rangeStart, rangeEnd);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>eachDayOfInterval({ start: rangeStart, end: rangeEnd }).forEach(date =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const formattedDate = formatDate(date);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dailyTxs = occurrences[formattedDate] || [];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let dailyNetChange = 0;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (dailyTxs.length &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let labelNetChange = 0;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>for (const tx of dailyTxs) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const amount = parseFloat(tx.amount);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (tx.type === 'income') labelNetChange += amount;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>else if (tx.type === 'expense') labelNetChange -= amount;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const hasIncome = dailyTxs.some(t =&gt; t.type === 'income');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const hasExpense = dailyTxs.some(t =&gt; t.type === 'expense');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let borderColor = 'rgba(156, 163, 175, 0.5)';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let bgColor = 'rgba(156, 163, 175, 0.8)';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (hasIncome &amp;&amp; !hasExpense) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor = 'rgba(16, 185, 129, 0.5)';</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>bgColor = 'rgba(16, 185, 129, 0.8)';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else if (!hasIncome &amp;&amp; hasExpense) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor = 'rgba(239, 68, 68, 0.5)';</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>bgColor = 'rgba(239, 68, 68, 0.8)';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const labelContent = dailyTxs.map(t =&gt; t.name).join(', ');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const netChangeString = `${labelNetChange &gt;= 0 ? '+' : ''}$${labelNetChange.toFixed(2)}`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const netChangeColor = labelNetChange &gt;= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)';</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>annotations.push({</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>type: 'line',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>scaleID: 'x',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>value: date,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor: borderColor,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderWidth: 2,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderDash: [6, 6],</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>content: [labelContent, netChangeString],</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>display: true,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>position: annotationLabelPositionToggle,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>backgroundColor: bgColor,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>color: ['#FFFFFF', netChangeColor],</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>borderRadius: 4,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>padding: 4,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>font: [</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>{ size: 10, weight: 'normal' },</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>{ size: 11, weight: 'bold' }</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>annotationLabelPositionToggle = (annotationLabelPositionToggle === 'start') ? 'end' : 'start';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>for (const tx of dailyTxs) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const amount = parseFloat(tx.amount);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (tx.type === 'income') dailyNetChange += amount;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>else if (tx.type === 'expense') dailyNetChange -= amount;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentBalance += dailyNetChange;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>balanceData.push({ x: date, y: currentBalance });</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>safeBalanceData.push({ x: date, y: safeBalance });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return { balanceData, safeBalanceData, annotations };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const renderCalendar = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!currentView.referenceDate) return;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>calendarGrid.innerHTML = '';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ref = currentView.referenceDate;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const monthStart = startOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const monthEnd = endOfMonth(ref);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentRangeEl.textContent = format(ref, 'MMMM yyyy');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const occurrences = getOccurrencesInRange(monthStart, monthEnd);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const firstDayOfWeek = getDay(monthStart);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (let i = 0; i &lt; firstDayOfWeek; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>calendarGrid.innerHTML += `&lt;div class="bg-gray-50 dark:bg-gray-800/50 rounded-md"&gt;&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const day of daysInMonth) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const formattedDate = formatDate(day);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dayNumber = getDate(day);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const txsOnDay = occurrences[formattedDate] || [];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let txHtml = '';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (txsOnDay.length &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txHtml = `&lt;div class="mt-1 space-y-1 overflow-y-auto max-h-16"&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txHtml += txsOnDay.map(tx =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const bgColor = tx.type === 'income' ? 'bg-green-600' : 'bg-red-600';</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>return `&lt;div class="${bgColor} text-white text-[10px] font-medium px-1.5 py-0.5 rounded-md truncate" title="${tx.name}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>${tx.name}</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txHtml += `&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dayCell = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayCell.className = 'calendar-day relative p-2 h-28 min-h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayCell.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="text-xs font-semibold text-gray-700 dark:text-gray-300"&gt;${dayNumber}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>${txHtml}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>dayCell.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (txsOnDay.length &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>openDayTransactionsModal(formattedDate, txsOnDay);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>openTxModal({ clickDate: formattedDate });</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>calendarGrid.appendChild(dayCell);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const refreshDisplay = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!globalStartDate) return;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentDisplayMode === 'chart') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>renderChart();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>renderCalendar();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderTransactionList();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Transaction Handlers ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const handleSaveTransaction = (txDataFromModal = null) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let txData;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (txDataFromModal) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txData = txDataFromModal;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const id = document.getElementById('tx-id').value;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const instanceDate = document.getElementById('tx-instance-date').value;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const selectedMode = document.querySelector('input[name="tx-type"]:checked').value;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const rawAmount = parseFloat(document.getElementById('tx-amount').value);</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const recurrenceToggle = document.querySelector('input[name="tx-recurrence-toggle"]:checked').value;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let frequency = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let interval = 1;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (recurrenceToggle === 'repeat') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>frequency = document.getElementById('tx-frequency').value;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>interval = parseInt(document.getElementById('tx-interval').value) || 1;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txData = {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>id: id,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>name: document.getElementById('tx-name').value,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>amount: rawAmount,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>type: selectedMode,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>startDate: document.getElementById('tx-date').value,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>frequency: frequency,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>interval: interval,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!txData.name || isNaN(txData.amount) || (txData.amount &lt;= 0 &amp;&amp; selectedMode !== 'balance') || !txData.startDate) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>showToast('Please fill in all fields with valid values.');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (selectedMode === 'balance') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const balanceBefore = getBalanceAtDate(parseISO(txData.startDate));</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const targetBalance = rawAmount;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const adjustment = targetBalance - balanceBefore;</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txData.type = (adjustment &gt;= 0) ? 'income' : 'expense';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txData.amount = Math.abs(adjustment);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txData.frequency = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txData.interval = 1;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txData.name = txData.name || 'Balance Adjustment';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const id = txData.id;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const instanceDate = document.getElementById('tx-instance-date').value; // Still need this for edits</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (id) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// --- Editing ---</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const tx = transactions.find(t =&gt; t.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (tx.frequency === 'none') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>Object.assign(tx, txData, { id: tx.id });</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>finishSave();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>openConfirmModal(</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>'Edit Recurring Transaction',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>'You are editing a recurring transaction. How would you like to apply this change?',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>instanceDate,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>(applyToAll) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (applyToAll) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>transactions.push({ ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>if (!tx.modifications) tx.modifications = {};</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>tx.modifications[instanceDate] = { name: txData.name, amount: txData.amount, type: txData.type };</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>finishSave();</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// --- Adding new ---</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>transactions.push({ ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>finishSave(true);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const handleDeleteTransaction = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const id = document.getElementById('tx-id').value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const instanceDate = document.getElementById('tx-instance-date').value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>handleDeleteFromList(id, instanceDate);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const handleDeleteFromList = (id, instanceDate) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const tx = transactions.find(t =&gt; t.id === id);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!tx) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (tx.frequency === 'none') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>transactions = transactions.filter(t =&gt; t.id !== id);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>finishDeleteFromList();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>openConfirmModal(</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>'Delete Recurring Transaction',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>'You are deleting a recurring transaction. How would you like to apply this change?',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>instanceDate,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>(applyToAll) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (applyToAll) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (!tx.skipDates) tx.skipDates = [];</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>tx.skipDates.push(instanceDate);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>finishDeleteFromList();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const finishSave = (showSuccessToast = false) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(txModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(confirmModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>editingTxContext = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>confirmCallback = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (showSuccessToast) showToast("Transaction added!", false);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>refreshDisplay(); // Just refresh the UI, no save</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const finishDeleteFromList = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(txModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(dayTxModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(confirmModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>confirmCallback = null;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>refreshDisplay(); // Just refresh the UI, no save</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Chart &amp; Rendering ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const getChartDateRange = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ref = currentView.referenceDate;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let start, end;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentView.unit === 'months') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (currentView.value === 1) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>start = startOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>end = endOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else if (currentView.value === 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>start = startOfMonth(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>end = endOfMonth(addMonths(start, 2));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (currentView.unit === 'years') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>start = startOfYear(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>end = endOfYear(ref);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return { start: startOfDay(start), end: startOfDay(end) };</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const renderChart = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!chartInstance || !globalStartDate) return;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const { start, end } = getChartDateRange();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentView.unit === 'months' &amp;&amp; currentView.value === 1) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentRangeEl.textContent = format(start, 'MMMM yyyy');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentRangeEl.textContent = `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const { balanceData, safeBalanceData, annotations } = calculateBalanceData(start, end);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const didDip = balanceData.some(d =&gt; d.y &lt; safeBalance);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[1].borderColor = didDip ? 'rgb(239, 68, 68)' : 'rgb(245, 158, 11)';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[1].backgroundColor = didDip ? redGradient : orangeGradient;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.labels = balanceData.map(d =&gt; d.x);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[0].data = balanceData;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[1].data = safeBalanceData;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const belowSafeBalance = 'rgb(239, 68, 68)';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const aboveSafeBalance = 'rgb(59, 130, 246)';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const fillWarning = 'rgba(239, 68, 68, 0.1)';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const fillStandard = 'rgba(59, 130, 246, 0.1)';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[0].segment = {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>borderColor: ctx =&gt; (!ctx.p0 || !ctx.p1) ? aboveSafeBalance : (ctx.p0.parsed.y &lt; safeBalance || ctx.p1.parsed.y &lt; safeBalance ? belowSafeBalance : aboveSafeBalance)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.data.datasets[0].fill = { target: '1', above: fillStandard, below: fillWarning };</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>let timeUnit = 'day';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentView.value === 3) timeUnit = 'week';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentView.unit === 'years') timeUnit = 'month';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.options.scales.x.time.unit = timeUnit;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.options.plugins.annotation.annotations = annotations;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance.update();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const renderTransactionList = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (transactions.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>emptyListMsg.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>transactionListContainer.innerHTML = '';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>transactionListContainer.appendChild(emptyListMsg);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>emptyListMsg.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>transactionListContainer.innerHTML = '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const sortedTxs = [...transactions].sort((a, b) =&gt; isBefore(parseISO(a.startDate), parseISO(b.startDate)) ? -1 : 1);</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const tx of sortedTxs) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const isRecurring = tx.frequency !== 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const colorClass = tx.type === 'income' ? 'text-green-500' : 'text-red-500';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const sign = tx.type === 'income' ? '+' : '-';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let recurrenceText = 'One-time';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (isRecurring) recurrenceText = `Every ${tx.interval} ${tx.frequency}`;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>let statusText = tx.endDate ? `(Ends ${formatShortDate(parseISO(tx.endDate))})` : '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const item = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.className = 'flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-200 mb-3 dark:bg-gray-800 dark:border-gray-700';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex-1 min-w-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="text-base font-semibold text-gray-800 truncate dark:text-gray-100"&gt;${tx.name}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-500 dark:text-gray-400"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>First occurs: ${formatShortDate(parseISO(tx.startDate))} ${statusText}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p class="text-sm text-gray-500 dark:text-gray-400"&gt;${recurrenceText}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="flex items-center ml-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;span class="text-lg font-bold ${colorClass} mr-4"&gt;${sign}$${tx.amount.toFixed(2)}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;button class="btn-edit-rule text-blue-600 hover:text-blue-800 p-2 rounded-md transition-colors dark:text-blue-400 dark:hover:text-blue-300" data-id="${tx.id}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"&gt;&lt;path d="M13.586 3.586a2 2 0 112.828 2.828l-7.96 7.96a2 2 0 01-1.06.586L3 16l.96-4.398a2 2 0 01.586-1.06l7.96-7.96zM12 5l-7 7 1.5 1.5L13.5 8 12 5z" /&gt;&lt;/svg&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>item.querySelector('.btn-edit-rule').addEventListener('click', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>openTxModal({ txId: e.currentTarget.dataset.id, instanceDate: tx.startDate });</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>transactionListContainer.appendChild(item);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const initializeChart = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (chartInstance) chartInstance.destroy();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const textColor = '#e5e7eb';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const gridColor = 'rgba(156, 163, 175, 0.2)';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>orangeGradient = chartCanvas.createLinearGradient(0, 0, 0, 400);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>orangeGradient.addColorStop(0, 'rgba(245, 158, 11, 0.3)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>orangeGradient.addColorStop(1, 'rgba(245, 158, 11, 0.05)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>redGradient = chartCanvas.createLinearGradient(0, 0, 0, 400);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>redGradient.addColorStop(0, 'rgba(239, 68, 68, 0.3)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>redGradient.addColorStop(1, 'rgba(239, 68, 68, 0.05)');</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartInstance = new Chart(chartCanvas, {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>type: 'line',</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>labels: [],</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>datasets: [</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: 'Account Balance',<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: [],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>tension: 0.1,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>pointRadius: 0,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>pointHitRadius: 10</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>label: 'Safe Balance',<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>data: [],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderColor: 'rgb(245, 158, 11)',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderWidth: 2,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>borderDash: [5, 5],<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>backgroundColor: orangeGradient,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>fill: 'start',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>pointRadius: 0,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>pointHitRadius: 0<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>]</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>options: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>responsive: true,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>maintainAspectRatio: false,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>scales: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>x: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>type: 'time',</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>time: { unit: 'day', tooltipFormat: 'MMM d, yyyy', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' } },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>grid: { display: false, borderColor: textColor },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>ticks: { color: textColor, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 15 }</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>y: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>min: 0,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>grid: { color: gridColor, borderColor: textColor },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>ticks: { color: textColor, callback: (value) =&gt; `$${value.toLocaleString()}` }</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>plugins: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>tooltip: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>mode: 'index',</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>intersect: false,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>callbacks: {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>title: (tooltipItems) =&gt; formatShortDate(new Date(tooltipItems[0].parsed.x)),</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>label: (tooltipItem) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>const label = tooltipItem.datasetIndex === 1 ? 'Safe Balance' : 'Balance';</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>return `${label}: $${tooltipItem.parsed.y.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>legend: { display: false },</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>annotation: { annotations: [] }</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>interaction: { mode: 'nearest', axis: 'x', intersect: false },</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>onClick: (evt) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const points = chartInstance.getElementsAtEventForMode(evt, 'nearest', { intersect: false }, true);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (points.length) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const clickedDate = chartInstance.data.labels[points[0].index];</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const formattedDate = formatDate(clickedDate);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const dailyOccurrences = getOccurrencesInRange(clickedDate, clickedDate);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const txsOnDay = dailyOccurrences[formattedDate] || [];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (txsOnDay.length &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>openDayTransactionsModal(formattedDate, txsOnDay);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>openTxModal({ clickDate: formattedDate });</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Gemini Chatbot Logic ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const systemPrompt = `You are a helpful financial assistant for a cash planning app.</p>
+<p class="p1">Your goal is to extract transaction details from the user's natural language input.</p>
+<p class="p1">The current date is ${formatDate(new Date())}.</p>
+<p class="p1">You must respond ONLY in JSON format, using one of the two schemas provided.</p>
+<p class="p1">Do not add any text before or after the JSON object.</p>
+<p class="p2"><br></p>
+<p class="p1">Schema 1: ask_clarification</p>
+<p class="p1">Use this schema if the user's request is missing any information needed to create a transaction (name, amount, type, date, frequency).</p>
+<p class="p1">{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>"type": "ask_clarification",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>"question": "The question to ask the user."</p>
+<p class="p1">}</p>
+<p class="p1">Example: If the user says "Add my salary", you should ask "How much is your salary and when do you receive it?"</p>
+<p class="p1">Example: If the user says "Add $100 for groceries", you should ask "Great. When should I add this $100 for groceries?"</p>
+<p class="p2"><br></p>
+<p class="p1">Schema 2: add_transactions</p>
+<p class="p1">Use this schema if you have all the necessary information to create one or more transactions.</p>
+<p class="p1">{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>"type": "add_transactions",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>"transactions": [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"name": "Transaction Name",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"amount": 100.00,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"type": "income" | "expense",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"startDate": "YYYY-MM-DD",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"frequency": "none" | "days" | "weeks" | "months",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"interval": 1</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>]</p>
+<p class="p1">}</p>
+<p class="p1">Recurrence Rules:</p>
+<p class="p1">- "none": A one-time transaction.</p>
+<p class="p1">- "days": Repeats every 'interval' days.</p>
+<p class="p1">- "weeks": Repeats every 'interval' weeks.</p>
+<p class="p1">- "months": Repeats every 'interval' months.</p>
+<p class="p1">- If no interval is specified, assume 1.</p>
+<p class="p1">- "every friday" means { "frequency": "weeks", "interval": 1, "startDate": "YYYY-MM-DD" }</p>
+<p class="p1">- "every 2 weeks" means { "frequency": "weeks", "interval": 2 }</p>
+<p class="p1">- "monthly" means { "frequency": "months", "interval": 1 }</p>
+<p class="p1">- "bi-monthly" means { "frequency": "months", "interval": 2 }</p>
+<p class="p1">`;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const addChatMessage = (role, text) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const messageEl = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>messageEl.className = `chat-message ${role} rounded-lg p-3`;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (role === 'model') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>messageEl.innerHTML = markdownConverter.makeHtml(text);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>messageEl.textContent = text;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatHistoryContainer.appendChild(messageEl);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const callGemini = async (userPrompt) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const apiKey = ""; // Leave as ""</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Add user message to history</p>
+<p class="p1"><span class="Apple-converted-space">                </span>geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const payload = {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>contents: [</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>...geminiChatHistory</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>],</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>systemInstruction: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>parts: [{ text: systemPrompt }]</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>generationConfig: {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>responseMimeType: "application/json",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// This schema forces the model to choose one of two actions</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>responseSchema: {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>type: "OBJECT",</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>properties: {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>"type": { "type": "STRING" },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>"question": { "type": "STRING" },</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>"transactions": {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>type: "ARRAY",</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>items: {</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>type: "OBJECT",</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>properties: {</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"name": { "type": "STRING" },</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"amount": { "type": "NUMBER" },</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"type": { "type": "STRING", "enum": ["income", "expense"] },</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"startDate": { "type": "STRING" },</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"frequency": { "type": "STRING", "enum": ["none", "days", "weeks", "months"] },</p>
+<p class="p1"><span class="Apple-converted-space">                                            </span>"interval": { "type": "NUMBER" }</p>
+<p class="p1"><span class="Apple-converted-space">                                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>let retries = 3;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>while (retries &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const response = await fetch(apiUrl, {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>method: 'POST',</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>headers: { 'Content-Type': 'application/json' },</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>body: JSON.stringify(payload)</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (!response.ok) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>throw new Error(`API Error: ${response.status} ${response.statusText}`);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const result = await response.json();</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (result.candidates &amp;&amp; result.candidates[0].content?.parts[0]?.text) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const jsonText = result.candidates[0].content.parts[0].text;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const modelResponse = JSON.parse(jsonText);</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// Add model response to history</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>geminiChatHistory.push({ role: "model", parts: [{ text: jsonText }] });</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>return modelResponse; // Success</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>throw new Error("Invalid response structure from API.");</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>retries--;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>console.error("Error calling Gemini API:", error);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (retries === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>return { type: 'ask_clarification', question: "Sorry, I'm having trouble connecting right now. Please try again in a moment." };</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>await new Promise(res =&gt; setTimeout(res, 1000 * (3 - retries))); // Exponential backoff</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const handleChatSubmit = async (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const prompt = chatInput.value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!prompt) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatInput.value = '';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatSubmitBtn.disabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatSpinner.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>addChatMessage('user', prompt);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const response = await callGemini(prompt);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (response.type === 'ask_clarification') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>addChatMessage('model', response.question);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else if (response.type === 'add_transactions') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// --- FIX: Check for valid transactions array ---</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!response.transactions || !Array.isArray(response.transactions) || response.transactions.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>console.error("AI returned 'add_transactions' but provided no valid transactions.", response);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>addChatMessage('model', "Sorry, I thought I had enough information, but I'm missing the transaction details. Could you please provide them again?");</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// --- END FIX ---</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let summary = "Okay! I've added the following transactions:\n\n";</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>let success = true;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>for (const tx of response.transactions) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>const newTx = {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>id: null, // Will be set by handleSaveTransaction</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>name: tx.name,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>amount: tx.amount,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>type: tx.type,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>startDate: tx.startDate,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>frequency: tx.frequency,</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>interval: tx.interval,</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>// Validate date</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>parseISO(newTx.startDate);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>// Add to app state (will be saved at the end)</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>transactions.push({ ...newTx, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>summary += `* **${tx.name}**: $${tx.amount} (${tx.type}) starting ${tx.startDate}\n`;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} catch (err) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>console.error("Error adding transaction from AI:", err, tx);</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>success = false;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if(success) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>refreshDisplay(); // Just refresh, no save</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>addChatMessage('model', summary);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>showToast("Transactions added!", false);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>addChatMessage('model', "Sorry, I had an error adding those transactions. Some data might have been invalid.");</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatSpinner.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatSubmitBtn.disabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chatInput.focus();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Event Listeners ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setupForm.addEventListener('submit', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>startingBalance = parseFloat(document.getElementById('starting-balance').value);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>safeBalance = parseFloat(document.getElementById('safe-balance').value);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>globalStartDate = startOfDay(parseISO(document.getElementById('start-date').value));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentView.referenceDate = globalStartDate;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (isNaN(startingBalance) || isNaN(safeBalance) || !globalStartDate) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>showToast('Please enter a valid balance, safe balance, and start date.');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!chartInstance) initializeChart();</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>refreshDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(setupModal);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>txForm.addEventListener('submit', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>handleSaveTransaction();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>chatForm.addEventListener('submit', handleChatSubmit);</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-tx-cancel').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(txModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>editingTxContext = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-tx-delete').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>handleDeleteTransaction();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Other App Listeners ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('tx-type-group').addEventListener('change', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const selected = e.target.value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const toggleRepeat = document.querySelector('input[name="tx-recurrence-toggle"][value="repeat"]');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (selected === 'balance') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txAmountLabel.textContent = 'Set New Balance ($)';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.querySelector('input[name="tx-recurrence-toggle"][value="none"]').checked = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txRecurrenceOptions.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toggleRepeat.disabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>txAmountLabel.textContent = 'Amount ($)';</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>toggleRepeat.disabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('input[name="tx-recurrence-toggle"]').forEach(radio =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>radio.addEventListener('change', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (e.target.value === 'repeat') {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txRecurrenceOptions.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>txRecurrenceOptions.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-confirm-one').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (confirmCallback) confirmCallback(false);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-confirm-all').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (confirmCallback) confirmCallback(true);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-confirm-cancel').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>closeModal(confirmModal);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>confirmCallback = null;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('start-date').addEventListener('click', () =&gt; openDatePickerModal('start-date'));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('tx-date').addEventListener('click', () =&gt; openDatePickerModal('tx-date'));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-date-prev').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>datePickerState.referenceDate = addMonths(datePickerState.referenceDate, -1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderDatePicker();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-date-next').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>datePickerState.referenceDate = addMonths(datePickerState.referenceDate, 1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderDatePicker();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const updateView = (unit, value) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentView.unit = unit;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentView.value = value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (unit === 'years') currentView.referenceDate = globalStartDate;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.querySelectorAll('.btn-view').forEach(btn =&gt; btn.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white'));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let activeBtn;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (unit === 'months' &amp;&amp; value === 1) activeBtn = document.getElementById('btn-view-1m');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>else if (unit === 'months' &amp;&amp; value === 3) activeBtn = document.getElementById('btn-view-3m');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>else if (unit === 'years') activeBtn = document.getElementById('btn-view-1y');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if(activeBtn) activeBtn.classList.add('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderChart();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-view-1m').addEventListener('click', () =&gt; updateView('months', 1));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-view-3m').addEventListener('click', () =&gt; updateView('months', 3));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-view-1y').addEventListener('click', () =&gt; updateView('years', 1));</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-prev').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentDisplayMode === 'chart') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (currentView.unit === 'months') currentView.referenceDate = addMonths(currentView.referenceDate, -currentView.value);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>else if (currentView.unit === 'years') currentView.referenceDate = addYears(currentView.referenceDate, -1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentView.referenceDate = addMonths(currentView.referenceDate, -1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>refreshDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-next').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentDisplayMode === 'chart') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (currentView.unit === 'months') currentView.referenceDate = addMonths(currentView.referenceDate, currentView.value);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>else if (currentView.unit === 'years') currentView.referenceDate = addYears(currentView.referenceDate, 1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>currentView.referenceDate = addMonths(currentView.referenceDate, 1);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>refreshDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-today').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentView.referenceDate = startOfDay(new Date());</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentDisplayMode !== 'chart') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>document.getElementById('btn-display-chart').click();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>refreshDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>updateView('months', 1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-add-new-rule').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>openTxModal();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-display-chart').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentDisplayMode = 'chart';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartContainer.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>calendarContainer.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>viewToggleContainer.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('btn-display-chart').classList.add('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('btn-display-calendar').classList.remove('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderChart();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('btn-display-calendar').addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentDisplayMode = 'calendar';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>chartContainer.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>calendarContainer.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>viewToggleContainer.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('btn-display-calendar').classList.add('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('btn-display-chart').classList.remove('active', 'bg-white', 'text-blue-600', 'shadow', 'dark:bg-blue-600', 'dark:text-white');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderCalendar();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Initialization ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>openSetupModal();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
