@@ -1,4 +1,5 @@
 require('dotenv').config(); // Load environment variables from .env file
+// This is a dummy comment to trigger a new Vercel deployment
 const express = require('express');
 const cors = require('cors');
 const Database = require('better-sqlite3');
