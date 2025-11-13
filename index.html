@@ -100,6 +100,11 @@
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Cash Planner</h1>
                 <p class="text-gray-500 dark:text-gray-400">Visualize your income and expenses over time.</p>
             </div>
+            <div class="flex items-center gap-4">
+                <span id="header-username" class="text-lg font-semibold text-gray-700 dark:text-gray-300 hidden"></span>
+                <button id="btn-logout" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 hidden">Logout</button>
+                <button id="btn-login-header" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 hidden">Login</button>
+            </div>
         </header>
 
         <!-- Controls -->
@@ -411,6 +416,51 @@
         <span id="toast-message"></span>
     </div>
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Login to Cash Planner</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Username</label>
+                    <input type="text" id="login-username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150 mb-4">
+                    Login
+                </button>
+                <p class="text-center text-gray-600 dark:text-gray-400">
+                    Don't have an account? <a href="#" id="show-register-modal" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Register here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Register for Cash Planner</h2>
+            <form id="register-form">
+                <div class="mb-4">
+                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Username</label>
+                    <input type="text" id="register-username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                </div>
+                <div class="mb-6">
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
+                    <input type="password" id="register-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150 mb-4">
+                    Register
+                </button>
+                <p class="text-center text-gray-600 dark:text-gray-400">
+                    Already have an account? <a href="#" id="show-login-modal" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
 
     <script type="module">
         document.addEventListener('DOMContentLoaded', () => {
@@ -446,6 +496,7 @@
             } = window.dateFns;
 
             // --- Global State ---
+            const BACKEND_URL = 'http://localhost:3000'; // Our Express backend
             let chartInstance = null;
             let startingBalance = null;
             let safeBalance = 0;
@@ -459,6 +510,8 @@
             let datePickerState = { referenceDate: new Date(), targetInputId: null };
             let markdownConverter = new showdown.Converter();
             let geminiChatHistory = []; // For the chatbot
+            let accessToken = null; // Store JWT token
+            let currentUserId = null;
 
             // --- DOM Elements ---
             const setupModal = document.getElementById('setup-modal');
@@ -486,10 +539,36 @@
             const chatSpinner = document.getElementById('chat-spinner');
             const chatSubmitBtn = document.getElementById('chat-submit-btn');
             
+            // Auth DOM Elements
+            const loginModal = document.getElementById('login-modal');
+            const registerModal = document.getElementById('register-modal');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const showRegisterModalBtn = document.getElementById('show-register-modal');
+            const showLoginModalBtn = document.getElementById('show-login-modal');
+            const headerUsernameEl = document.getElementById('header-username');
+            const btnLogout = document.getElementById('btn-logout');
+            const btnLoginHeader = document.getElementById('btn-login-header');
+            
             // --- Utility Functions ---
             const formatDate = (date) => format(date, 'yyyy-MM-dd');
             const formatShortDate = (date) => format(date, 'MMM d, yyyy');
             const generateUUID = () => crypto.randomUUID();
+            
+            const saveAuthToken = (token) => {
+                localStorage.setItem('accessToken', token);
+                accessToken = token;
+            };
+            
+            const getAuthToken = () => {
+                return localStorage.getItem('accessToken');
+            };
+            
+            const removeAuthToken = () => {
+                localStorage.removeItem('accessToken');
+                accessToken = null;
+                currentUserId = null;
+            };
 
             const showToast = (message, isError = true) => {
                 const toast = document.getElementById('toast');
@@ -725,6 +804,7 @@
                 }
 
                 for (const tx of transactions) {
+                    if (tx.userId !== currentUserId) continue; // Only show current user's transactions
                     const txStartDate = startOfDay(parseISO(tx.startDate));
                     
                     const ruleStartsAfterRange = isAfter(txStartDate, rangeEnd);
@@ -801,6 +881,7 @@
                 let balance = startingBalance;
                 eachDayOfInterval({ start: globalStartDate, end: rangeEnd }).forEach(date => {
                     const dailyTxs = occurrences[formatDate(date)] || [];
+                    if (dailyTxs.length === 0) return; // Skip if no transactions for the day
                     for (const tx of dailyTxs) {
                         const amount = parseFloat(tx.amount);
                         if (tx.type === 'income') balance += amount;
@@ -950,7 +1031,7 @@
             };
 
             // --- Transaction Handlers ---
-            const handleSaveTransaction = (txDataFromModal = null) => {
+            const handleSaveTransaction = async (txDataFromModal = null) => {
                 let txData;
 
                 if (txDataFromModal) {
@@ -997,7 +1078,7 @@
                         txData.name = txData.name || 'Balance Adjustment';
                     }
                 }
-                
+  
                 const id = txData.id;
                 const instanceDate = document.getElementById('tx-instance-date').value; // Still need this for edits
 
@@ -1006,28 +1087,48 @@
                     const tx = transactions.find(t => t.id === id);
                     if (tx.frequency === 'none') {
                         Object.assign(tx, txData, { id: tx.id });
-                        finishSave();
+                        // API Call for update
+                        try {
+                            await callApi(`/transactions/${tx.id}`, 'PUT', txData);
+                            finishSave();
+                        } catch (error) {
+                            showToast('Error updating transaction.');
+                        }
                     } else {
                         openConfirmModal(
                             'Edit Recurring Transaction',
                             'You are editing a recurring transaction. How would you like to apply this change?',
                             instanceDate,
-                            (applyToAll) => {
-                                if (applyToAll) {
-                                    tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));
-                                    transactions.push({ ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });
-                                } else {
-                                    if (!tx.modifications) tx.modifications = {};
-                                    tx.modifications[instanceDate] = { name: txData.name, amount: txData.amount, type: txData.type };
+                            async (applyToAll) => {
+                                try {
+                                    if (applyToAll) {
+                                        // Update the existing rule's end date and create a new one
+                                        tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));
+                                        await callApi(`/transactions/${tx.id}`, 'PUT', tx);
+                                        transactions.push({ ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });
+                                        await callApi('/transactions', 'POST', transactions[transactions.length - 1]); // Add new rule
+                                    } else {
+                                        if (!tx.modifications) tx.modifications = {};
+                                        tx.modifications[instanceDate] = { name: txData.name, amount: txData.amount, type: txData.type };
+                                        await callApi(`/transactions/${tx.id}`, 'PUT', tx);
+                                    }
+                                    finishSave();
+                                } catch (error) {
+                                    showToast('Error applying recurring transaction changes.');
                                 }
-                                finishSave();
                             }
                         );
                     }
                 } else {
                     // --- Adding new ---
-                    transactions.push({ ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} });
-                    finishSave(true);
+                    const newTx = { ...txData, id: generateUUID(), userId: currentUserId, endDate: null, skipDates: [], modifications: {} };
+                    try {
+                        await callApi('/transactions', 'POST', newTx);
+                        transactions.push(newTx); // Add to local state after successful API call
+                        finishSave(true);
+                    } catch (error) {
+                        showToast('Error adding transaction.');
+                    }
                 }
             };
 
@@ -1042,21 +1143,42 @@
                 if (!tx) return;
 
                 if (tx.frequency === 'none') {
-                    transactions = transactions.filter(t => t.id !== id);
-                    finishDeleteFromList();
+                    // API Call for delete
+                    openConfirmModal(
+                        'Delete Transaction',
+                        'Are you sure you want to delete this one-time transaction?',
+                        null, // No instance date for one-time
+                        async (confirmed) => {
+                            if (confirmed) {
+                                try {
+                                    await callApi(`/transactions/${tx.id}`, 'DELETE');
+                                    transactions = transactions.filter(t => t.id !== id);
+                                    finishDeleteFromList();
+                                } catch (error) {
+                                    showToast('Error deleting transaction.');
+                                }
+                            }
+                        }
+                    );
                 } else {
                     openConfirmModal(
                         'Delete Recurring Transaction',
                         'You are deleting a recurring transaction. How would you like to apply this change?',
                         instanceDate,
-                        (applyToAll) => {
-                            if (applyToAll) {
-                                tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));
-                            } else {
-                                if (!tx.skipDates) tx.skipDates = [];
-                                tx.skipDates.push(instanceDate);
+                        async (applyToAll) => {
+                            try {
+                                if (applyToAll) {
+                                    tx.endDate = formatDate(addDays(parseISO(instanceDate), -1));
+                                    await callApi(`/transactions/${tx.id}`, 'PUT', tx);
+                                } else {
+                                    if (!tx.skipDates) tx.skipDates = [];
+                                    tx.skipDates.push(instanceDate);
+                                    await callApi(`/transactions/${tx.id}`, 'PUT', tx);
+                                }
+                                finishDeleteFromList();
+                            } catch (error) {
+                                showToast('Error applying recurring transaction changes.');
                             }
-                            finishDeleteFromList();
                         }
                     );
                 }
@@ -1276,6 +1398,7 @@
             const systemPrompt = `You are a helpful financial assistant for a cash planning app.
 Your goal is to extract transaction details from the user's natural language input.
 The current date is ${formatDate(new Date())}.
+${currentUserId ? `The user is logged in with ID: ${currentUserId}.` : 'The user is not logged in.'}
 You must respond ONLY in JSON format, using one of the two schemas provided.
 Do not add any text before or after the JSON object.
 
@@ -1330,85 +1453,14 @@ Recurrence Rules:
             };
 
             const callGemini = async (userPrompt) => {
-                const apiKey = "AIzaSyBvTJb_lxqyeSryw_NjT12bEaqXHQCd84E";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-                // Add user message to history
-                geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
-                
-                const payload = {
-                    contents: [
-                        ...geminiChatHistory
-                    ],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        // --- FIX: Made schema stricter ---
-                        responseSchema: {
-                            type: "OBJECT",
-                            properties: {
-                                "type": { "type": "STRING" },
-                                "question": { "type": "STRING" },
-                                "transactions": {
-                                    type: "ARRAY",
-                                    items: {
-                                        type: "OBJECT",
-                                        properties: {
-                                            "name": { "type": "STRING" },
-                                            "amount": { "type": "NUMBER" },
-                                            "type": { "type": "STRING", "enum": ["income", "expense"] },
-                                            "startDate": { "type": "STRING" },
-                                            "frequency": { "type": "STRING", "enum": ["none", "days", "weeks", "months"] },
-                                            "interval": { "type": "NUMBER" }
-                                        },
-                                        // These fields are required for the AI to add a transaction
-                                        "required": ["name", "amount", "type", "startDate", "frequency"]
-                                    }
-                                }
-                            },
-                             "required": ["type"]
-                        }
-                        // --- END FIX ---
-                    }
-                };
-
-                let retries = 3;
-                while (retries > 0) {
-                    try {
-                        const response = await fetch(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-                        
-                        if (result.candidates && result.candidates[0].content?.parts[0]?.text) {
-                            const jsonText = result.candidates[0].content.parts[0].text;
-                            const modelResponse = JSON.parse(jsonText);
-                            
-                            // Add model response to history
-                            geminiChatHistory.push({ role: "model", parts: [{ text: jsonText }] });
-                            
-                            return modelResponse; // Success
-                        } else {
-                            throw new Error("Invalid response structure from API.");
-                        }
-
-                    } catch (error) {
-                        retries--;
-                        console.error("Error calling Gemini API:", error);
-                        if (retries === 0) {
-                            return { type: 'ask_clarification', question: "Sorry, I'm having trouble connecting right now. Please try again in a moment." };
-                        }
-                        await new Promise(res => setTimeout(res, 1000 * (3 - retries))); // Exponential backoff
-                    }
+                try {
+                    const data = await callApi('/gemini-chat', 'POST', { chatHistory: geminiChatHistory, systemPrompt: systemPrompt });
+                    const modelResponse = JSON.parse(data.candidates[0].content.parts[0].text);
+                    geminiChatHistory.push({ role: "model", parts: [{ text: data.candidates[0].content.parts[0].text }] });
+                    return modelResponse;
+                } catch (error) {
+                    console.error("Error calling backend for Gemini chat:", error);
+                    return { type: 'ask_clarification', question: "Sorry, I'm having trouble connecting to Gemini right now. Please try again in a moment." };
                 }
             };
 
@@ -1615,7 +1667,154 @@ Recurrence Rules:
             });
 
             // --- Initialization ---
-            openSetupModal();
+            const callApi = async (endpoint, method = 'GET', data = null) => {
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                if (accessToken) {
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                }
+
+                const config = {
+                    method,
+                    headers,
+                };
+
+                if (data) {
+                    config.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${BACKEND_URL}${endpoint}`, config);
+
+                if (response.status === 401 || response.status === 403) {
+                    // Token expired or invalid, force logout
+                    showToast('Session expired. Please log in again.');
+                    logout();
+                    throw new Error('Unauthorized');
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Something went wrong');
+                }
+
+                return response.json();
+            };
+
+            const fetchTransactions = async () => {
+                try {
+                    const data = await callApi('/transactions');
+                    transactions = data; // Update global transactions array
+                    refreshDisplay();
+                } catch (error) {
+                    console.error('Error fetching transactions:', error);
+                    showToast('Failed to load transactions.');
+                }
+            };
+
+            const initApp = async () => {
+                accessToken = getAuthToken();
+                if (accessToken) {
+                    try {
+                        // We need a way to get user ID from token without full validation on frontend
+                        // For now, let's assume the token is valid and we can decode it (not secure for real apps)
+                        const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+                        currentUserId = decodedToken.id;
+                        headerUsernameEl.textContent = `Welcome, ${decodedToken.username}!`;
+                        headerUsernameEl.classList.remove('hidden');
+                        btnLogout.classList.remove('hidden');
+                        btnLoginHeader.classList.add('hidden');
+
+                        // Fetch initial data (starting balance, safe balance, start date) from user profile later
+                        // For now, use defaults
+                        startingBalance = 5000;
+                        safeBalance = 1000;
+                        globalStartDate = startOfDay(new Date());
+                        currentView.referenceDate = globalStartDate;
+
+                        if (!chartInstance) initializeChart();
+                        await fetchTransactions(); // Fetch transactions for the authenticated user
+                        closeModal(loginModal); // Close login if successful
+                        closeModal(registerModal); // Close register if successful
+                        closeModal(setupModal); // Close setup if successful
+                    } catch (error) {
+                        console.error('Token validation failed or user data fetch error:', error);
+                        showToast('Invalid session. Please log in again.');
+                        removeAuthToken();
+                        headerUsernameEl.classList.add('hidden');
+                        btnLogout.classList.add('hidden');
+                        btnLoginHeader.classList.remove('hidden');
+                        openModal(loginModal);
+                    }
+                } else {
+                    headerUsernameEl.classList.add('hidden');
+                    btnLogout.classList.add('hidden');
+                    btnLoginHeader.classList.remove('hidden');
+                    openModal(loginModal);
+                }
+            };
+
+            const handleRegister = async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+
+                try {
+                    await callApi('/register', 'POST', { username, password });
+                    showToast('Registration successful! Please log in.', false);
+                    closeModal(registerModal);
+                    openModal(loginModal);
+                } catch (error) {
+                    showToast(error.message || 'Registration failed.');
+                }
+            };
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+
+                try {
+                    const data = await callApi('/login', 'POST', { username, password });
+                    saveAuthToken(data.accessToken);
+                    initApp(); // Re-initialize app after login
+                    showToast('Logged in successfully!', false);
+                } catch (error) {
+                    showToast(error.message || 'Login failed.');
+                }
+            };
+
+            const logout = () => {
+                removeAuthToken();
+                transactions = []; // Clear local transactions
+                chartInstance.destroy(); // Destroy chart
+                chartInstance = null;
+                headerUsernameEl.classList.add('hidden');
+                btnLogout.classList.add('hidden');
+                btnLoginHeader.classList.remove('hidden');
+                openModal(loginModal);
+                showToast('Logged out successfully.', false);
+            };
+
+            // --- New Event Listeners for Auth ---
+            registerForm.addEventListener('submit', handleRegister);
+            loginForm.addEventListener('submit', handleLogin);
+            showRegisterModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeModal(loginModal);
+                openModal(registerModal);
+            });
+            showLoginModalBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeModal(registerModal);
+                openModal(loginModal);
+            });
+            btnLogout.addEventListener('click', logout);
+            btnLoginHeader.addEventListener('click', () => openModal(loginModal));
+
+            // Initial app load check
+            initApp();
         });
     </script>
 </body>
