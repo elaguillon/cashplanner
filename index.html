@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cash Planner1</title>
+    <title>Cash Planner</title>
     <!-- 1. Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 2. Inter Font -->
@@ -725,13 +725,7 @@
                 }
 
                 for (const tx of transactions) {
-                    let txStartDate;
-                    try {
-                        txStartDate = startOfDay(parseISO(tx.startDate));
-                    } catch (e) {
-                        console.error("Invalid tx startDate:", tx);
-                        continue;
-                    }
+                    const txStartDate = startOfDay(parseISO(tx.startDate));
                     
                     const ruleStartsAfterRange = isAfter(txStartDate, rangeEnd);
                     const ruleEndsBeforeRange = tx.endDate && isBefore(startOfDay(parseISO(tx.endDate)), rangeStart);
@@ -1154,13 +1148,7 @@
                 emptyListMsg.classList.add('hidden');
                 transactionListContainer.innerHTML = '';
 
-                const sortedTxs = [...transactions].sort((a, b) => {
-                    try {
-                        return isBefore(parseISO(a.startDate), parseISO(b.startDate)) ? -1 : 1;
-                    } catch(e) {
-                        return 0;
-                    }
-                });
+                const sortedTxs = [...transactions].sort((a, b) => isBefore(parseISO(a.startDate), parseISO(b.startDate)) ? -1 : 1);
                 
                 for (const tx of sortedTxs) {
                     const isRecurring = tx.frequency !== 'none';
@@ -1342,7 +1330,7 @@ Recurrence Rules:
             };
 
             const callGemini = async (userPrompt) => {
-                const apiKey = "AIzaSyBvTJb_lxqyeSryw_NjT12bEaqXHQCd84E"; // Leave as ""
+                const apiKey = "AIzaSyBvTJb_lxqyeSryw_NjT12bEaqXHQCd84E";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
                 // Add user message to history
@@ -1357,7 +1345,7 @@ Recurrence Rules:
                     },
                     generationConfig: {
                         responseMimeType: "application/json",
-                        // This schema forces the model to choose one of two actions
+                        // --- FIX: Made schema stricter ---
                         responseSchema: {
                             type: "OBJECT",
                             properties: {
@@ -1374,11 +1362,15 @@ Recurrence Rules:
                                             "startDate": { "type": "STRING" },
                                             "frequency": { "type": "STRING", "enum": ["none", "days", "weeks", "months"] },
                                             "interval": { "type": "NUMBER" }
-                                        }
+                                        },
+                                        // These fields are required for the AI to add a transaction
+                                        "required": ["name", "amount", "type", "startDate", "frequency"]
                                     }
                                 }
-                            }
+                            },
+                             "required": ["type"]
                         }
+                        // --- END FIX ---
                     }
                 };
 
@@ -1435,12 +1427,10 @@ Recurrence Rules:
                 if (response.type === 'ask_clarification') {
                     addChatMessage('model', response.question);
                 } else if (response.type === 'add_transactions') {
-                    // --- FIX: Check for valid transactions array ---
                     if (!response.transactions || !Array.isArray(response.transactions) || response.transactions.length === 0) {
                         console.error("AI returned 'add_transactions' but provided no valid transactions.", response);
                         addChatMessage('model', "Sorry, I thought I had enough information, but I'm missing the transaction details. Could you please provide them again?");
                     } else {
-                    // --- END FIX ---
                         let summary = "Okay! I've added the following transactions:\n\n";
                         let success = true;
 
@@ -1452,7 +1442,7 @@ Recurrence Rules:
                                 type: tx.type,
                                 startDate: tx.startDate,
                                 frequency: tx.frequency,
-                                interval: tx.interval,
+                                interval: tx.interval || 1, // Default interval to 1 if missing
                             };
 
                             try {
