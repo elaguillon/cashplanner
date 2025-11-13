@@ -15,12 +15,8 @@
       "dest": "/backend/api"
     },
     {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/public/index.html" // Fallback to index.html for any unmatched static path
     }
   ]
 }
