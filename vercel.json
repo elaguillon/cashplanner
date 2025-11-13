@@ -1,22 +1,20 @@
 {
-  "builds": [
+  "rewrites": [
     {
-      "src": "public",
-      "use": "@vercel/static-build"
-    },
-    {
-      "src": "backend/api/index.js",
-      "use": "@vercel/node"
+      "source": "/api/(.*)",
+      "destination": "/backend/api"
     }
   ],
-  "routes": [
+  "public": true,
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/api"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/public/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=1, stale-while-revalidate"
+        }
+      ]
     }
   ]
 }
