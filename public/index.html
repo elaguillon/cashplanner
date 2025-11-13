@@ -100,11 +100,7 @@
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Cash Planner</h1>
                 <p class="text-gray-500 dark:text-gray-400">Visualize your income and expenses over time.</p>
             </div>
-            <div class="flex items-center gap-4">
-                <span id="header-username" class="text-lg font-semibold text-gray-700 dark:text-gray-300 hidden"></span>
-                <button id="btn-logout" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 hidden">Logout</button>
-                <button id="btn-login-header" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-150 hidden">Login</button>
-            </div>
+            <button id="open-setup-modal" class="hidden">Open Setup</button>
         </header>
 
         <!-- Controls -->
@@ -416,51 +412,7 @@
         <span id="toast-message"></span>
     </div>
 
-    <!-- Login Modal -->
-    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Login to Cash Planner</h2>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Username</label>
-                    <input type="text" id="login-username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                </div>
-                <div class="mb-6">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
-                    <input type="password" id="login-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150 mb-4">
-                    Login
-                </button>
-                <p class="text-center text-gray-600 dark:text-gray-400">
-                    Don't have an account? <a href="#" id="show-register-modal" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Register here</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Register Modal -->
-    <div id="register-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl dark:bg-gray-800">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Register for Cash Planner</h2>
-            <form id="register-form">
-                <div class="mb-4">
-                    <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Username</label>
-                    <input type="text" id="register-username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                </div>
-                <div class="mb-6">
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Password</label>
-                    <input type="password" id="register-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-150 mb-4">
-                    Register
-                </button>
-                <p class="text-center text-gray-600 dark:text-gray-400">
-                    Already have an account? <a href="#" id="show-login-modal" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Login here</a>
-                </p>
-            </form>
-        </div>
-    </div>
+    <!-- Register Modal (Removed) -->
 
     <script type="module">
         document.addEventListener('DOMContentLoaded', () => {
@@ -510,8 +462,7 @@
             let datePickerState = { referenceDate: new Date(), targetInputId: null };
             let markdownConverter = new showdown.Converter();
             let geminiChatHistory = []; // For the chatbot
-            let accessToken = null; // Store JWT token
-            let currentUserId = null;
+            // accessToken and currentUserId removed
 
             // --- DOM Elements ---
             const setupModal = document.getElementById('setup-modal');
@@ -539,36 +490,13 @@
             const chatSpinner = document.getElementById('chat-spinner');
             const chatSubmitBtn = document.getElementById('chat-submit-btn');
             
-            // Auth DOM Elements
-            const loginModal = document.getElementById('login-modal');
-            const registerModal = document.getElementById('register-modal');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const showRegisterModalBtn = document.getElementById('show-register-modal');
-            const showLoginModalBtn = document.getElementById('show-login-modal');
-            const headerUsernameEl = document.getElementById('header-username');
-            const btnLogout = document.getElementById('btn-logout');
-            const btnLoginHeader = document.getElementById('btn-login-header');
+            // Auth DOM Elements (Removed all references)
             
             // --- Utility Functions ---
             const formatDate = (date) => format(date, 'yyyy-MM-dd');
             const formatShortDate = (date) => format(date, 'MMM d, yyyy');
             const generateUUID = () => crypto.randomUUID();
-            
-            const saveAuthToken = (token) => {
-                localStorage.setItem('accessToken', token);
-                accessToken = token;
-            };
-            
-            const getAuthToken = () => {
-                return localStorage.getItem('accessToken');
-            };
-            
-            const removeAuthToken = () => {
-                localStorage.removeItem('accessToken');
-                accessToken = null;
-                currentUserId = null;
-            };
+            // saveAuthToken, getAuthToken, removeAuthToken functions removed
 
             const showToast = (message, isError = true) => {
                 const toast = document.getElementById('toast');
@@ -804,7 +732,7 @@
                 }
 
                 for (const tx of transactions) {
-                    if (tx.userId !== currentUserId) continue; // Only show current user's transactions
+                    // if (tx.userId !== currentUserId) continue; // No longer needed without auth
                     const txStartDate = startOfDay(parseISO(tx.startDate));
                     
                     const ruleStartsAfterRange = isAfter(txStartDate, rangeEnd);
@@ -1121,7 +1049,7 @@
                     }
                 } else {
                     // --- Adding new ---
-                    const newTx = { ...txData, id: generateUUID(), userId: currentUserId, endDate: null, skipDates: [], modifications: {} };
+                    const newTx = { ...txData, id: generateUUID(), endDate: null, skipDates: [], modifications: {} }; // Removed userId: currentUserId
                     try {
                         await callApi('/transactions', 'POST', newTx);
                         transactions.push(newTx); // Add to local state after successful API call
@@ -1395,27 +1323,7 @@
 
             // --- Gemini Chatbot Logic ---
 
-            const systemPrompt = `You are a helpful financial assistant for a cash planning app.
-Your goal is to extract transaction details from the user's natural language input.
-The current date is ${formatDate(new Date())}.
-${currentUserId ? `The user is logged in with ID: ${currentUserId}.` : 'The user is not logged in.'}
-
-You must respond ONLY in JSON format. Do not add any text before or after the JSON object.
-
-Your response should be either:
-
-1.  A JSON object with \"type\": \"ask_clarification\" and a \"question\" field,
-2.  A JSON object with \"type\": \"add_transactions\" and a \"transactions\" array.
-
-For \"add_transactions\", each transaction object must have \"name\", \"amount\", \"type\" (income/expense), \"startDate\" (YYYY-MM-DD), \"frequency\" (none/days/weeks/months), and \"interval\".
-
-Example transaction for \"add_transactions\":
-{\"name\":\"Salary\", \"amount\":2000.00, \"type\":\"income\", \"startDate\":\"2025-11-15\", \"frequency\":\"weeks\", \"interval\":2}
-
-Example clarification for \"ask_clarification\":
-{\"type\":\"ask_clarification\", \"question\":\"How much is your salary and when do you receive it?\"}
-
-`;
+            const systemPrompt = `You are a helpful financial assistant for a cash planning app.\nYour goal is to extract transaction details from the user's natural language input.\nThe current date is ${formatDate(new Date())}.\n\nYou must respond ONLY in JSON format. Do not add any text before or after the JSON object.\n\nYour response should be either:\n\n1.  A JSON object with \"type\": \"ask_clarification\" and a \"question\" field,\n2.  A JSON object with \"type\": \"add_transactions\" and a \"transactions\" array.\n\nFor \"add_transactions\", each transaction object must have \"name\", \"amount\", \"type\" (income/expense), \"startDate\" (YYYY-MM-DD), \"frequency\" (none/days/weeks/months), and \"interval\".\n\nExample transaction for \"add_transactions\":\n{\"name\":\"Salary\", \"amount\":2000.00, \"type\":\"income\", \"startDate\":\"2025-11-15\", \"frequency\":\"weeks\", \"interval\":2}\n\nExample clarification for \"ask_clarification\":\n{\"type\":\"ask_clarification\", \"question\":\"How much is your salary and when do you receive it?\"}\n\n`;
             
             const addChatMessage = (role, text) => {
                 const messageEl = document.createElement('div');
@@ -1432,16 +1340,18 @@ Example clarification for \"ask_clarification\":
             };
 
             const callGemini = async (userPrompt) => {
+                // Add user message to history
+                geminiChatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+                
                 try {
                     const data = await callApi('/gemini-chat', 'POST', { chatHistory: geminiChatHistory, systemPrompt: systemPrompt });
-                    // Expecting plain text for now, not JSON.parse
-                    const modelResponseText = data.candidates[0].content.parts[0].text;
-                    geminiChatHistory.push({ role: "model", parts: [{ text: modelResponseText }] });
-                    
-                    // For now, just return a simple object, we'll re-add parsing later
-                    return { type: 'ask_clarification', question: modelResponseText };
+                    // Re-enable JSON parsing
+                    const modelResponse = JSON.parse(data.candidates[0].content.parts[0].text);
+                    geminiChatHistory.push({ role: "model", parts: [{ text: data.candidates[0].content.parts[0].text }] });
+                    return modelResponse;
                 } catch (error) {
                     console.error("Error calling backend for Gemini chat:", error);
+                    addChatMessage('model', "Sorry, I'm having trouble connecting to Gemini right now. Please try again in a moment.");
                     return { type: 'ask_clarification', question: "Sorry, I'm having trouble connecting to Gemini right now. Please try again in a moment." };
                 }
             };
@@ -1653,10 +1563,7 @@ Example clarification for \"ask_clarification\":
                 const headers = {
                     'Content-Type': 'application/json',
                 };
-
-                if (accessToken) {
-                    headers['Authorization'] = `Bearer ${accessToken}`;
-                }
+                // Removed Authorization header
 
                 const config = {
                     method,
@@ -1668,13 +1575,6 @@ Example clarification for \"ask_clarification\":
                 }
 
                 const response = await fetch(`${BACKEND_URL}${endpoint}`, config);
-
-                if (response.status === 401 || response.status === 403) {
-                    // Token expired or invalid, force logout
-                    showToast('Session expired. Please log in again.');
-                    logout();
-                    throw new Error('Unauthorized');
-                }
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -1696,106 +1596,18 @@ Example clarification for \"ask_clarification\":
             };
 
             const initApp = async () => {
-                accessToken = getAuthToken();
-                if (accessToken) {
-                    try {
-                        // We need a way to get user ID from token without full validation on frontend
-                        // For now, let's assume the token is valid and we can decode it (not secure for real apps)
-                        const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
-                        currentUserId = decodedToken.id;
-                        headerUsernameEl.textContent = `Welcome, ${decodedToken.username}!`;
-                        headerUsernameEl.classList.remove('hidden');
-                        btnLogout.classList.remove('hidden');
-                        btnLoginHeader.classList.add('hidden');
+                // No authentication, directly set default values
+                startingBalance = 5000;
+                safeBalance = 1000;
+                globalStartDate = startOfDay(new Date());
+                currentView.referenceDate = globalStartDate;
 
-                        // Fetch initial data (starting balance, safe balance, start date) from user profile later
-                        // For now, use defaults
-                        startingBalance = 5000;
-                        safeBalance = 1000;
-                        globalStartDate = startOfDay(new Date());
-                        currentView.referenceDate = globalStartDate;
-
-                        if (!chartInstance) initializeChart();
-                        await fetchTransactions(); // Fetch transactions for the authenticated user
-                        closeModal(loginModal); // Close login if successful
-                        closeModal(registerModal); // Close register if successful
-                        closeModal(setupModal); // Close setup if successful
-                    } catch (error) {
-                        console.error('Token validation failed or user data fetch error:', error);
-                        showToast('Invalid session. Please log in again.');
-                        removeAuthToken();
-                        headerUsernameEl.classList.add('hidden');
-                        btnLogout.classList.add('hidden');
-                        btnLoginHeader.classList.remove('hidden');
-                        openModal(loginModal);
-                    }
-                } else {
-                    headerUsernameEl.classList.add('hidden');
-                    btnLogout.classList.add('hidden');
-                    btnLoginHeader.classList.remove('hidden');
-                    openModal(loginModal);
-                }
+                if (!chartInstance) initializeChart();
+                await fetchTransactions(); // Fetch transactions for the default user
+                openSetupModal(); // Always open setup modal first (can be closed by user)
             };
 
-            const handleRegister = async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('register-username').value;
-                const password = document.getElementById('register-password').value;
-
-                try {
-                    await callApi('/register', 'POST', { username, password });
-                    showToast('Registration successful! Please log in.', false);
-                    closeModal(registerModal);
-                    openModal(loginModal);
-                } catch (error) {
-                    showToast(error.message || 'Registration failed.');
-                }
-            };
-
-            const handleLogin = async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('login-username').value;
-                const password = document.getElementById('login-password').value;
-
-                try {
-                    const data = await callApi('/login', 'POST', { username, password });
-                    saveAuthToken(data.accessToken);
-                    initApp(); // Re-initialize app after login
-                    showToast('Logged in successfully!', false);
-                } catch (error) {
-                    showToast(error.message || 'Login failed.');
-                }
-            };
-
-            const logout = () => {
-                removeAuthToken();
-                transactions = []; // Clear local transactions
-                chartInstance.destroy(); // Destroy chart
-                chartInstance = null;
-                headerUsernameEl.classList.add('hidden');
-                btnLogout.classList.add('hidden');
-                btnLoginHeader.classList.remove('hidden');
-                openModal(loginModal);
-                showToast('Logged out successfully.', false);
-            };
-
-            // --- New Event Listeners for Auth ---
-            registerForm.addEventListener('submit', handleRegister);
-            loginForm.addEventListener('submit', handleLogin);
-            showRegisterModalBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                closeModal(loginModal);
-                openModal(registerModal);
-            });
-            showLoginModalBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                closeModal(registerModal);
-                openModal(loginModal);
-            });
-            btnLogout.addEventListener('click', logout);
-            btnLoginHeader.addEventListener('click', () => openModal(loginModal));
-
-            // Initial app load check
+            // Initial app load
             initApp();
         });
     </script>

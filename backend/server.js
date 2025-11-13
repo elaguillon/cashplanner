@@ -3,13 +3,13 @@ require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const cors = require('cors');
 const Database = require('better-sqlite3');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcrypt'); // No longer needed
+// const jwt = require('jsonwebtoken'); // No longer needed
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const db = new Database('cashplanner.db', { verbose: console.log });
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // Use environment variable
+// const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // No longer needed
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Get Gemini API key from .env
 
 // Ensure API key is present
@@ -18,14 +18,14 @@ if (!GEMINI_API_KEY) {
     process.exit(1);
 }
 
-// Create users table if it doesn't exist
-db.prepare(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-`).run();
+// Create users table if it doesn't exist (no longer needed for auth, but can keep for consistency if we add user profiles later)
+// db.prepare(`
+//     CREATE TABLE IF NOT EXISTS users (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         username TEXT UNIQUE NOT NULL,
+//         password TEXT NOT NULL
+//     )
+// `).run();
 
 // Create transactions table if it doesn't exist
 db.prepare(`
@@ -40,8 +40,8 @@ db.prepare(`
         interval INTEGER NOT NULL DEFAULT 1,
         endDate TEXT,
         skipDates TEXT,
-        modifications TEXT,
-        FOREIGN KEY (userId) REFERENCES users(id)
+        modifications TEXT
+        // FOREIGN KEY (userId) REFERENCES users(id) // No longer needed without auth
     )
 `).run();
 
@@ -49,87 +49,25 @@ db.prepare(`
 app.use(cors());
 app.use(express.json()); // For parsing application/json
 
-// Middleware to authenticate JWT
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (token == null) return res.sendStatus(401); // No token
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403); // Token no longer valid
-        req.user = user; // Attach user payload to request
-        next();
-    });
-};
+// No authentication middleware needed
+// const authenticateToken = (req, res, next) => { /* ... */ };
 
 // Basic route
 app.get('/', (req, res) => {
-    res.send('Cash Planner Backend API');
+    res.send('Cash Planner Backend API (Auth Disabled)');
 });
 
-// User Registration
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+// User Registration/Login routes removed
+// app.post('/register', async (req, res) => { /* ... */ });
+// app.post('/login', async (req, res) => { /* ... */ });
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
-    }
+// --- Transaction Routes (Auth Removed) ---
 
+// Get all transactions for a user (hardcoding userId = 1)
+app.get('/transactions', (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const stmt = db.prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-        stmt.run(username, hashedPassword);
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-        if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-            return res.status(409).json({ message: 'Username already exists' });
-        }
-        console.error('Registration error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-// User Login
-app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
-    }
-
-    try {
-        const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
-        const user = stmt.get(username);
-
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        // Generate JWT token
-        const accessToken = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-
-        res.status(200).json({ message: 'Login successful', accessToken: accessToken });
-
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
-// --- Protected Transaction Routes ---
-
-// Get all transactions for a user
-app.get('/transactions', authenticateToken, (req, res) => {
-    try {
-        const stmt = db.prepare('SELECT * FROM transactions WHERE userId = ?');
-        const transactions = stmt.all(req.user.id);
+        const stmt = db.prepare('SELECT * FROM transactions WHERE userId = 1'); // Hardcode userId
+        const transactions = stmt.all();
         res.status(200).json(transactions.map(tx => ({
             ...tx,
             skipDates: JSON.parse(tx.skipDates || '[]'),
@@ -141,8 +79,8 @@ app.get('/transactions', authenticateToken, (req, res) => {
     }
 });
 
-// Add a new transaction
-app.post('/transactions', authenticateToken, (req, res) => {
+// Add a new transaction (hardcoding userId = 1)
+app.post('/transactions', (req, res) => {
     const { id, name, amount, type, startDate, frequency, interval, endDate, skipDates, modifications } = req.body;
 
     if (!id || !name || isNaN(amount) || !type || !startDate || !frequency) {
@@ -151,7 +89,7 @@ app.post('/transactions', authenticateToken, (req, res) => {
 
     try {
         const stmt = db.prepare('INSERT INTO transactions (id, userId, name, amount, type, startDate, frequency, interval, endDate, skipDates, modifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        stmt.run(id, req.user.id, name, amount, type, startDate, frequency, interval, endDate || null, JSON.stringify(skipDates || []), JSON.stringify(modifications || {}));
+        stmt.run(id, 1, name, amount, type, startDate, frequency, interval, endDate || null, JSON.stringify(skipDates || []), JSON.stringify(modifications || {})); // Hardcode userId
         res.status(201).json({ message: 'Transaction added successfully', transaction: req.body });
     } catch (error) {
         console.error('Add transaction error:', error);
@@ -159,8 +97,8 @@ app.post('/transactions', authenticateToken, (req, res) => {
     }
 });
 
-// Update a transaction
-app.put('/transactions/:id', authenticateToken, (req, res) => {
+// Update a transaction (hardcoding userId = 1)
+app.put('/transactions/:id', (req, res) => {
     const { id } = req.params;
     const { name, amount, type, startDate, frequency, interval, endDate, skipDates, modifications } = req.body;
 
@@ -169,15 +107,11 @@ app.put('/transactions/:id', authenticateToken, (req, res) => {
     }
 
     try {
-        const existingTx = db.prepare('SELECT userId FROM transactions WHERE id = ?').get(id);
-        if (!existingTx || existingTx.userId !== req.user.id) {
-            return res.status(404).json({ message: 'Transaction not found or unauthorized' });
-        }
-
+        // No need to check userId for authorization, as auth is removed
         const stmt = db.prepare(
-            'UPDATE transactions SET name = ?, amount = ?, type = ?, startDate = ?, frequency = ?, interval = ?, endDate = ?, skipDates = ?, modifications = ? WHERE id = ? AND userId = ?'
+            'UPDATE transactions SET name = ?, amount = ?, type = ?, startDate = ?, frequency = ?, interval = ?, endDate = ?, skipDates = ?, modifications = ? WHERE id = ? AND userId = 1' // Hardcode userId
         );
-        stmt.run(name, amount, type, startDate, frequency, interval, endDate || null, JSON.stringify(skipDates || []), JSON.stringify(modifications || {}), id, req.user.id);
+        stmt.run(name, amount, type, startDate, frequency, interval, endDate || null, JSON.stringify(skipDates || []), JSON.stringify(modifications || {}), id);
         res.status(200).json({ message: 'Transaction updated successfully' });
     } catch (error) {
         console.error('Update transaction error:', error);
@@ -185,18 +119,14 @@ app.put('/transactions/:id', authenticateToken, (req, res) => {
     }
 });
 
-// Delete a transaction
-app.delete('/transactions/:id', authenticateToken, (req, res) => {
+// Delete a transaction (hardcoding userId = 1)
+app.delete('/transactions/:id', (req, res) => {
     const { id } = req.params;
 
     try {
-        const existingTx = db.prepare('SELECT userId FROM transactions WHERE id = ?').get(id);
-        if (!existingTx || existingTx.userId !== req.user.id) {
-            return res.status(404).json({ message: 'Transaction not found or unauthorized' });
-        }
-
-        const stmt = db.prepare('DELETE FROM transactions WHERE id = ? AND userId = ?');
-        stmt.run(id, req.user.id);
+        // No need to check userId for authorization, as auth is removed
+        const stmt = db.prepare('DELETE FROM transactions WHERE id = ? AND userId = 1'); // Hardcode userId
+        stmt.run(id);
         res.status(200).json({ message: 'Transaction deleted successfully' });
     } catch (error) {
         console.error('Delete transaction error:', error);
@@ -205,7 +135,7 @@ app.delete('/transactions/:id', authenticateToken, (req, res) => {
 });
 
 // --- Gemini Chatbot Endpoint ---
-app.post('/gemini-chat', authenticateToken, async (req, res) => {
+app.post('/gemini-chat', async (req, res) => { // No authentication middleware needed
     const { chatHistory, systemPrompt } = req.body;
 
     if (!chatHistory || !systemPrompt) {
@@ -220,7 +150,12 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: chatHistory
+                contents: chatHistory,
+                systemInstruction: { parts: [{ text: systemPrompt }] }, // Re-add systemInstruction
+                generationConfig: {
+                    responseMimeType: "application/json", // Re-add responseMimeType
+                    // Keep responseSchema removed for now, as it was causing issues
+                }
             })
         });
 
@@ -238,11 +173,6 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
         console.error('Error in /gemini-chat endpoint:', error);
         res.status(500).json({ message: 'Internal server error', details: error.message });
     }
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app; // Export the app for Vercel
