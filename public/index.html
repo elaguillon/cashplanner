@@ -1434,9 +1434,12 @@ Example clarification for \"ask_clarification\":
             const callGemini = async (userPrompt) => {
                 try {
                     const data = await callApi('/gemini-chat', 'POST', { chatHistory: geminiChatHistory, systemPrompt: systemPrompt });
-                    const modelResponse = JSON.parse(data.candidates[0].content.parts[0].text);
-                    geminiChatHistory.push({ role: "model", parts: [{ text: data.candidates[0].content.parts[0].text }] });
-                    return modelResponse;
+                    // Expecting plain text for now, not JSON.parse
+                    const modelResponseText = data.candidates[0].content.parts[0].text;
+                    geminiChatHistory.push({ role: "model", parts: [{ text: modelResponseText }] });
+                    
+                    // For now, just return a simple object, we'll re-add parsing later
+                    return { type: 'ask_clarification', question: modelResponseText };
                 } catch (error) {
                     console.error("Error calling backend for Gemini chat:", error);
                     return { type: 'ask_clarification', question: "Sorry, I'm having trouble connecting to Gemini right now. Please try again in a moment." };

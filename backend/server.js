@@ -220,11 +220,7 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: chatHistory,
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
+                contents: chatHistory
             })
         });
 
