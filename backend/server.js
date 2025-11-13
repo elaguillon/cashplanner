@@ -9,8 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const db = new Database('cashplanner.db', { verbose: console.log });
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'; // Use environment variable
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Get Gemini API key from environment
-console.log('Server sees GEMINI_API_KEY (first 4, last 4):', GEMINI_API_KEY ? GEMINI_API_KEY.substring(0, 4) + '...' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4) : 'NOT SET');
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Get Gemini API key from .env
+
+// Ensure API key is present
+if (!GEMINI_API_KEY) {
+    console.error('Error: GEMINI_API_KEY is not set in environment variables.');
+    process.exit(1);
+}
+
 // Create users table if it doesn't exist
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
