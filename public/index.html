@@ -1399,43 +1399,22 @@
 Your goal is to extract transaction details from the user's natural language input.
 The current date is ${formatDate(new Date())}.
 ${currentUserId ? `The user is logged in with ID: ${currentUserId}.` : 'The user is not logged in.'}
-You must respond ONLY in JSON format, using one of the two schemas provided.
-Do not add any text before or after the JSON object.
 
-Schema 1: ask_clarification
-Use this schema if the user's request is missing any information needed to create a transaction (name, amount, type, date, frequency).
-{
-    "type": "ask_clarification",
-    "question": "The question to ask the user."
-}
-Example: If the user says "Add my salary", you should ask "How much is your salary and when do you receive it?"
-Example: If the user says "Add $100 for groceries", you should ask "Great. When should I add this $100 for groceries?"
+You must respond ONLY in JSON format. Do not add any text before or after the JSON object.
 
-Schema 2: add_transactions
-Use this schema if you have all the necessary information to create one or more transactions.
-{
-    "type": "add_transactions",
-    "transactions": [
-        {
-            "name": "Transaction Name",
-            "amount": 100.00,
-            "type": "income" | "expense",
-            "startDate": "YYYY-MM-DD",
-            "frequency": "none" | "days" | "weeks" | "months",
-            "interval": 1
-        }
-    ]
-}
-Recurrence Rules:
-- "none": A one-time transaction.
-- "days": Repeats every 'interval' days.
-- "weeks": Repeats every 'interval' weeks.
-- "months": Repeats every 'interval' months.
-- If no interval is specified, assume 1.
-- "every friday" means { "frequency": "weeks", "interval": 1, "startDate": "YYYY-MM-DD" }
-- "every 2 weeks" means { "frequency": "weeks", "interval": 2 }
-- "monthly" means { "frequency": "months", "interval": 1 }
-- "bi-monthly" means { "frequency": "months", "interval": 2 }
+Your response should be either:
+
+1.  A JSON object with \"type\": \"ask_clarification\" and a \"question\" field,
+2.  A JSON object with \"type\": \"add_transactions\" and a \"transactions\" array.
+
+For \"add_transactions\", each transaction object must have \"name\", \"amount\", \"type\" (income/expense), \"startDate\" (YYYY-MM-DD), \"frequency\" (none/days/weeks/months), and \"interval\".
+
+Example transaction for \"add_transactions\":
+{\"name\":\"Salary\", \"amount\":2000.00, \"type\":\"income\", \"startDate\":\"2025-11-15\", \"frequency\":\"weeks\", \"interval\":2}
+
+Example clarification for \"ask_clarification\":
+{\"type\":\"ask_clarification\", \"question\":\"How much is your salary and when do you receive it?\"}
+
 `;
             
             const addChatMessage = (role, text) => {
