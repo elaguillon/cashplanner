@@ -270,3 +270,5 @@ app.post('/gemini-chat', authenticateToken, async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app; // Export the app for Vercel
